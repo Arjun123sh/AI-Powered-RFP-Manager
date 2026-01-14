@@ -1,10 +1,3 @@
-Perfect — here’s a **clean, professional README.md** generated exactly as per your assignment and the system design you shared.
-No email writing block is used since this is **code/documentation**, not an email.
-
-You can directly paste this into your GitHub repository as **README.md**.
-
----
-
 # 🧠 AI-Powered RFP Management System
 
 ## 📌 Project Overview
@@ -45,7 +38,7 @@ The company then compares vendor proposals and selects the best offer.
 
 ### Frontend
 
-* React / Next.js
+* React.js
 * Tailwind CSS or Material UI
 
 ### Backend
@@ -60,7 +53,6 @@ The company then compares vendor proposals and selects the best offer.
 ### AI Engine
 
 * Ollama (Llama3 Model)
-  *(Local Generative AI – no paid API required)*
 
 ### Email Integration
 
