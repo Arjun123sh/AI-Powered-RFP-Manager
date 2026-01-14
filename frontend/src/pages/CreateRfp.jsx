@@ -24,313 +24,189 @@ export default function CreateRfp() {
 
     async function submit() {
         if (!text.trim()) return;
-
         setLoading(true);
+
         try {
             const res = await fetch("http://localhost:5000/api/rfp/create", {
                 method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text }),
             });
             const data = await res.json();
             setResult(data);
             setSent(false);
         } catch (error) {
-            console.error("Error creating RFP:", error);
-            alert("Failed to create RFP. Please try again.");
+            alert("Failed to create RFP");
         } finally {
             setLoading(false);
         }
     }
 
     async function sendToVendors() {
-        if (selectedVendors.length === 0) {
-            alert("Please select at least one vendor");
-            return;
-        }
+        if (selectedVendors.length === 0) return alert("Select at least one vendor");
 
         setSending(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/email/send/${result._id}`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vendorIds: selectedVendors })
-            });
+            const res = await fetch(
+                `http://localhost:5000/api/email/send/${result._id}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ vendorIds: selectedVendors }),
+                }
+            );
             const data = await res.json();
             alert(data.message);
             setSent(true);
-        } catch (error) {
-            console.error("Error sending emails:", error);
+        } catch {
             alert("Failed to send emails");
         } finally {
             setSending(false);
         }
     }
 
-    function toggleVendor(vendorId) {
-        setSelectedVendors(prev =>
-            prev.includes(vendorId)
-                ? prev.filter(id => id !== vendorId)
-                : [...prev, vendorId]
+    function toggleVendor(id) {
+        setSelectedVendors((prev) =>
+            prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
         );
     }
 
     return (
-        <div className="page-container">
-            <div className="page-header">
-                <h1 className="page-title">Create RFP</h1>
-                <p className="page-description">
-                    Describe your requirements in natural language, and AI will convert it into a structured RFP
-                </p>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <div className="max-w-6xl mx-auto px-6 py-12">
 
-            <div className="content-section">
-                <div className="form-group">
-                    <label className="form-label">RFP Description</label>
-                    <textarea
-                        className="fade-in"
-                        rows="8"
-                        placeholder="Example: Need 20 laptops with 16GB RAM, Intel i7 processor, budget $50,000, delivery in 30 days, 2-year warranty..."
-                        value={text}
-                        onChange={e => setText(e.target.value)}
-                        style={{
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '0.95rem',
-                            lineHeight: '1.6'
-                        }}
-                    />
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-3">
+                        Create RFP
+                    </h1>
+                    <p className="text-slate-400 text-lg">
+                        Describe your requirements and generate a structured RFP
+                    </p>
                 </div>
 
-                <button
-                    onClick={submit}
-                    className="btn-primary"
-                    disabled={loading || !text.trim()}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        minWidth: '200px',
-                        justifyContent: 'center'
-                    }}
-                >
-                    {loading ? (
-                        <>
-                            <span className="loading"></span>
-                            Processing...
-                        </>
-                    ) : (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg>
-                            Generate Structured RFP
-                        </>
-                    )}
-                </button>
-            </div>
+                {/* Input Card */}
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+                    <label className="block mb-3 text-base font-semibold text-slate-200">
+                        RFP Description
+                    </label>
 
-            {result && (
-                <>
-                    <div className="content-section fade-in" style={{ marginTop: '2rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Structured RFP Output</h3>
-                        <div style={{
-                            background: 'rgba(0, 0, 0, 0.3)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-md)',
-                            padding: '1.5rem',
-                            overflow: 'auto',
-                            maxHeight: '500px'
-                        }}>
-                            <pre style={{
-                                color: 'var(--color-text-primary)',
-                                fontFamily: 'Monaco, Consolas, monospace',
-                                fontSize: '0.9rem',
-                                lineHeight: '1.6',
-                                margin: 0,
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word'
-                            }}>
+                    <textarea
+                        rows="7"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Example: Need 20 laptops with i7, 16GB RAM, delivery in 30 days..."
+                        className="w-full bg-slate-900/50 border border-slate-600/50 rounded-xl p-4 text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                    />
+
+                    <button
+                        onClick={submit}
+                        disabled={loading || !text.trim()}
+                        className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
+                        {loading ? "Processing..." : "Generate Structured RFP"}
+                    </button>
+                </div>
+
+                {/* Result */}
+                {result && (
+                    <>
+                        {/* Structured Output */}
+                        <div className="mt-8 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+                            <h3 className="text-2xl font-bold text-white mb-6">Structured RFP Output</h3>
+
+                            <pre className="bg-slate-900/70 border border-slate-700/50 p-6 rounded-xl text-sm text-slate-200 overflow-auto max-h-96 shadow-inner">
                                 {JSON.stringify(result.structured, null, 2)}
                             </pre>
-                        </div>
 
-                        {result.structured && (
-                            <div style={{
-                                marginTop: '1.5rem',
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                gap: '1rem'
-                            }}>
-                                {result.structured.budget && (
-                                    <div style={{
-                                        padding: '1rem',
-                                        background: 'var(--color-bg-card)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-sm)',
-                                        textAlign: 'center'
-                                    }}>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Budget</div>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: '600' }}>{result.structured.budget}</div>
+                            {/* Quick Stats */}
+                            <div className="grid md:grid-cols-3 gap-4 mt-6">
+                                {result.structured?.budget && (
+                                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 p-5 rounded-xl text-center shadow-lg">
+                                        <p className="text-slate-400 text-sm font-medium mb-1">Budget</p>
+                                        <p className="text-xl font-bold text-white">{result.structured.budget}</p>
                                     </div>
                                 )}
-                                {result.structured.deliveryDays && (
-                                    <div style={{
-                                        padding: '1rem',
-                                        background: 'var(--color-bg-card)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-sm)',
-                                        textAlign: 'center'
-                                    }}>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Delivery</div>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: '600' }}>{result.structured.deliveryDays} days</div>
+                                {result.structured?.deliveryDays && (
+                                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 p-5 rounded-xl text-center shadow-lg">
+                                        <p className="text-slate-400 text-sm font-medium mb-1">Delivery</p>
+                                        <p className="text-xl font-bold text-white">
+                                            {result.structured.deliveryDays} days
+                                        </p>
                                     </div>
                                 )}
-                                {result.structured.warranty && (
-                                    <div style={{
-                                        padding: '1rem',
-                                        background: 'var(--color-bg-card)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-sm)',
-                                        textAlign: 'center'
-                                    }}>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Warranty</div>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: '600' }}>{result.structured.warranty}</div>
+                                {result.structured?.warranty && (
+                                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 p-5 rounded-xl text-center shadow-lg">
+                                        <p className="text-slate-400 text-sm font-medium mb-1">Warranty</p>
+                                        <p className="text-xl font-bold text-white">{result.structured.warranty}</p>
                                     </div>
                                 )}
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    {!sent && (
-                        <div className="content-section fade-in" style={{ marginTop: '2rem' }}>
-                            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Select Vendors</h3>
-                            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                                Choose which vendors should receive this RFP
-                            </p>
+                        {/* Vendor Selection */}
+                        {!sent && (
+                            <div className="mt-8 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+                                <h3 className="text-2xl font-bold text-white mb-2">Select Vendors</h3>
+                                <p className="text-slate-400 mb-6">
+                                    Choose vendors to send this RFP
+                                </p>
 
-                            {vendors.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
-                                    No vendors available. Please add vendors first.
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    {vendors.map((v) => (
+                                        <div
+                                            key={v._id}
+                                            onClick={() => toggleVendor(v._id)}
+                                            className={`p-5 rounded-xl cursor-pointer border-2 transition-all duration-200 ${
+                                                selectedVendors.includes(v._id)
+                                                    ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20"
+                                                    : "border-slate-700/50 bg-slate-900/30 hover:border-slate-600 hover:bg-slate-900/50"
+                                            }`}
+                                        >
+                                            <p className="font-semibold text-white">{v.name}</p>
+                                            <p className="text-sm text-slate-400 mt-1">{v.company}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                            ) : (
-                                <>
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                                        gap: '1rem',
-                                        marginBottom: '1.5rem'
-                                    }}>
-                                        {vendors.map(v => (
-                                            <div
-                                                key={v._id}
-                                                onClick={() => toggleVendor(v._id)}
-                                                style={{
-                                                    padding: '1rem',
-                                                    background: selectedVendors.includes(v._id)
-                                                        ? 'var(--color-bg-card-hover)'
-                                                        : 'var(--color-bg-card)',
-                                                    border: selectedVendors.includes(v._id)
-                                                        ? '2px solid var(--color-text-primary)'
-                                                        : '1px solid var(--color-border)',
-                                                    borderRadius: 'var(--radius-sm)',
-                                                    cursor: 'pointer',
-                                                    transition: 'all var(--transition-normal)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '1rem'
-                                                }}
-                                            >
-                                                <div style={{
-                                                    width: '20px',
-                                                    height: '20px',
-                                                    borderRadius: '4px',
-                                                    border: '2px solid var(--color-border)',
-                                                    background: selectedVendors.includes(v._id)
-                                                        ? 'var(--color-text-primary)'
-                                                        : 'transparent',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    flexShrink: 0
-                                                }}>
-                                                    {selectedVendors.includes(v._id) && (
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg-primary)" strokeWidth="3">
-                                                            <polyline points="20 6 9 17 4 12" />
-                                                        </svg>
-                                                    )}
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{v.name}</div>
-                                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{v.company}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
 
-                                    <button
-                                        onClick={sendToVendors}
-                                        className="btn-primary"
-                                        disabled={sending || selectedVendors.length === 0}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            minWidth: '220px',
-                                            justifyContent: 'center'
-                                        }}
-                                    >
-                                        {sending ? (
-                                            <>
-                                                <span className="loading"></span>
-                                                Sending...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                    <line x1="22" y1="2" x2="11" y2="13" />
-                                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                                </svg>
-                                                Send to {selectedVendors.length} Vendor{selectedVendors.length !== 1 ? 's' : ''}
-                                            </>
-                                        )}
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                <button
+                                    onClick={sendToVendors}
+                                    disabled={sending || selectedVendors.length === 0}
+                                    className="mt-6 px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                >
+                                    {sending
+                                        ? "Sending..."
+                                        : `Send to ${selectedVendors.length} Vendor${selectedVendors.length !== 1 ? 's' : ''}`}
+                                </button>
+                            </div>
+                        )}
 
-                    {sent && (
-                        <div className="content-section fade-in" style={{
-                            marginTop: '2rem',
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
-                            border: '2px solid var(--color-border-focus)',
-                            textAlign: 'center',
-                            padding: '3rem'
-                        }}>
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" strokeWidth="2" style={{ margin: '0 auto 1rem' }}>
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                <polyline points="22 4 12 14.01 9 11.01" />
-                            </svg>
-                            <h3 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>RFP Sent Successfully!</h3>
-                            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                                Your RFP has been sent to {selectedVendors.length} vendor{selectedVendors.length !== 1 ? 's' : ''}.
-                                They will reply via email with their proposals.
-                            </p>
-                            <button
-                                onClick={() => {
-                                    setText("");
-                                    setResult(null);
-                                    setSelectedVendors([]);
-                                    setSent(false);
-                                }}
-                                className="btn-secondary"
-                            >
-                                Create Another RFP
-                            </button>
-                        </div>
-                    )}
-                </>
-            )}
+                        {/* Success */}
+                        {sent && (
+                            <div className="mt-8 text-center bg-gradient-to-br from-green-900/30 to-slate-800/50 backdrop-blur-sm border-2 border-green-500/50 rounded-2xl p-12 shadow-2xl">
+                                <div className="text-6xl mb-4">✅</div>
+                                <h3 className="text-3xl font-bold text-white mb-3">
+                                    RFP Sent Successfully
+                                </h3>
+                                <p className="text-slate-300 mb-8 text-lg">
+                                    Your RFP was sent to selected vendors.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setText("");
+                                        setResult(null);
+                                        setSelectedVendors([]);
+                                        setSent(false);
+                                    }}
+                                    className="px-8 py-3 border-2 border-slate-600 bg-slate-800/50 text-white rounded-xl font-semibold hover:border-slate-500 hover:bg-slate-700/50 transition-all"
+                                >
+                                    Create Another RFP
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }
